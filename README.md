@@ -161,3 +161,117 @@ kubectl apply -f ./svc-db-noticias.yaml
 kubectl apply -f ./svc-portal-noticias.yaml
 kubectl apply -f ./svc-sistema-noticias.yaml
 ```
+
+kubectl get rs
+kubectl get deployments
+kubectl rollout history deployment nginx-deployment
+kubectl apply -f nginx-deployment.yaml --record
+kubectl annotate deployment nginx-deployment kubernetes.io/change-cause="Mensagem mais amigavel..."
+kubectl rollout undo deployment nginx-deployment --to-revision=2
+
+## Quando criados, Deployments auxiliam com controle de versionamento e criam um ReplicaSet automaticamente.
+ReplicaSet --> Pod
+Deployment --> ReplicaSet --> Pod
+
+## limpando o ambiente
+```
+kubectl get pods
+kubectl delete deployment nginx-deployment
+kubectl delete -f ./portal-noticias-replicaset.yaml
+```
+
+kubectl annotate deployment portal-noticias-deployment kubernetes.io/change-cause="Criando portal de noticias na versão 1"
+kubectl rollout history deployment portal-noticias-deployment
+
+kubectl delete pod sistema-noticias
+kubectl apply -f ./sistema-noticias-deployment.yaml
+
+kubectl delete pod db-noticias
+kubectl apply -f ./db-noticias-deployment.yaml
+kubectl delete deployment db-noticias-deployment
+
+
+## Volumes
+- Volumes possuem ciclo de vida dependentes de Pods e independentes de containers.
+
+kubectl exec -it pod-volume --container nginx-container -- bash
+
+no linux precisa via minikube
+minikube ssh
+cd /home && sudo mkdir primeiro-volume
+
+OU
+...
+        type: Directory
+...        
+        type: DirectoryOrCreate
+...        
+## Persistence Volume
+### AWS
+aws ec2 create-volume --availability-zone=sa-east-1a --size=8 --volume-type=gp2
+awsElasticBlockStore
+## Persistence Volume Claim
+PV <--> PVC
+
+PersistentVolumes possuem ciclos de vida independentes de Pods.
+É necessário um PersistentVolumeClaim para acessar um PersistentVolume.
+
+- Como criar Volumes através de arquivos de definição
+- Volumes persistem dados de containers dentro de pods e permitem o compartilhamento de arquivo dentro dos pods
+- Que Volumes possuem ciclo de vida independente dos containers, porém, vinculados aos pods
+- Como criar PersistentVolumes através de arquivos de definição
+- PersistentVolumes persistem dados de pods como um todo
+- PersistentVolumes possuem ciclo de vida independente de quaisquer outros recursos, inclusive pods
+- Como criar e para que servem os PersistentVolumeClaims
+- Que precisamos de um PersistentVolumeClaim para acessar um PersistentVolume
+
+
+## Storage Class
+PVC e PV de forma dinâmica
+Storage Classes fornecem dinamismo para criação de PersistentVolumes conforme demanda.
+
+## Stateful Set
+Quando um pod falha ou reinicia o volume ainda esta intacto
+pod --> pvc --> pv
+sistema-noticias-stateful.yaml
+ kubectl delete deployments sistema-noticias-deployment
+
+
+### Visualizando os eventos do cluster:
+kubectl get events
+
+### Visualizando a configuração do kubectl:
+kubectl config view
+
+minikube service svc-pod-1-loadbalancer
+minikube service --url svc-pod-1
+
+
+### parando tudo
+```
+kubectl delete service hello-node
+kubectl delete deployment hello-node
+### (Opcional) Pare a máquina virtual (VM) do Minikube:
+minikube stop
+### (Opcional) Remova a VM do Minikube:
+minikube delete
+```
+
+
+## Probes
+- Tornar visivel ao kubernetes que uma aplicação não está se compartando da maneira esperada;
+
+## Liveness (são para saber se a aplicação está saudável e/ou se deve ser reiniciada)
+portal-noticias-deployment.yaml
+
+## Readiness (são para saber se a aplicação já está pronta para receber requisições depois de iniciar)
+portal-noticias-deployment.yaml
+
+## Escalando pods automaticamente
+Horizontal Pod Autoscaler
+baseado em metricas
+
+```
+minikube addons list
+minikube addons enable metrics-server
+```
